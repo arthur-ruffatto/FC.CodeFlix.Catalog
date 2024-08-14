@@ -1,4 +1,5 @@
 ﻿using FC.CodeFlix.Catalog.Domain.Exceptions;
+using FluentAssertions;
 using DomainEntity = FC.CodeFlix.Catalog.Domain.Entity;
 
 namespace FC.CodeFlix.Catalog.UnitTests.Domain.Entity.Category;
@@ -22,15 +23,24 @@ public class CategoryTest
         var category = new DomainEntity.Category(validData.Name, validData.Description);
         var dateTimeAfter = DateTime.Now;
         
-        //Assert
-        Assert.NotNull(category);
+        //Assert using FluentAssertions
+        category.Should().NotBeNull();
+        category.Name.Should().Be(validData.Name);
+        category.Description.Should().Be(validData.Description);
+        category.Id.Should().NotBeEmpty();
+        category.CreatedAt.Should().NotBeSameDateAs(default(DateTime));
+        category.CreatedAt.Should().BeAfter(dateTimeBefore);
+        category.CreatedAt.Should().BeBefore(dateTimeAfter);
+        category.IsActive.Should().BeTrue();
+        
+        /*Assert.NotNull(category);
         Assert.Equal(validData.Name, category.Name);
         Assert.Equal(validData.Description, category.Description);
         Assert.NotEqual(default(Guid), category.Id);
         Assert.NotEqual(default(DateTime), category.CreatedAt);
         Assert.True(category.CreatedAt > dateTimeBefore);
         Assert.True(category.CreatedAt < dateTimeAfter);
-        Assert.True(category.IsActive);
+        Assert.True(category.IsActive);*/
     }
     
     [Theory(DisplayName = nameof(InstantiateWithActiveStatus))]
@@ -53,15 +63,24 @@ public class CategoryTest
         var category = new DomainEntity.Category(validData.Name, validData.Description, validData.IsActive);
         var dateTimeAfter = DateTime.Now;
         
-        //Assert
-        Assert.NotNull(category);
+        //Assert using FluentAssertions
+        category.Should().NotBeNull();
+        category.Name.Should().Be(validData.Name);
+        category.Description.Should().Be(validData.Description);
+        category.Id.Should().NotBeEmpty();
+        category.CreatedAt.Should().NotBeSameDateAs(default(DateTime));
+        category.CreatedAt.Should().BeAfter(dateTimeBefore);
+        category.CreatedAt.Should().BeBefore(dateTimeAfter);
+        category.IsActive.Should().Be(isActive);
+        
+        /*Assert.NotNull(category);
         Assert.Equal(validData.Name, category.Name);
         Assert.Equal(validData.Description, category.Description);
         Assert.NotEqual(default(Guid), category.Id);
         Assert.NotEqual(default(DateTime), category.CreatedAt);
         Assert.True(category.CreatedAt > dateTimeBefore);
         Assert.True(category.CreatedAt < dateTimeAfter);
-        Assert.Equal(isActive, category.IsActive);
+        Assert.Equal(isActive, category.IsActive);*/
     }
 
     [Theory(DisplayName = nameof(InstantiateWhenNameIsNullOrEmpty))]
@@ -72,8 +91,8 @@ public class CategoryTest
     public void InstantiateWhenNameIsNullOrEmpty(string? name)
     {
         Action action = () => new DomainEntity.Category(name!, "Category description");
-        var exception = Assert.Throws<EntityValidationException>(action);
-        Assert.Equal("Name should not be null or empty", exception.Message);
+        action.Should().Throw<EntityValidationException>()
+            .WithMessage("Name should not be null or empty");
     }
     
     [Fact(DisplayName = nameof(InstantiateWhenDescriptionIsNull))]
@@ -81,8 +100,8 @@ public class CategoryTest
     public void InstantiateWhenDescriptionIsNull()
     {
         Action action = () => new DomainEntity.Category("Category name", null!);
-        var exception = Assert.Throws<EntityValidationException>(action);
-        Assert.Equal("Description should not be null or empty", exception.Message);
+        action.Should().Throw<EntityValidationException>()
+            .WithMessage("Description should not be null or empty");
     }
     
     [Theory(DisplayName = nameof(InstantiateWhenNameIsLessThan3Chars))]
@@ -94,8 +113,8 @@ public class CategoryTest
     public void InstantiateWhenNameIsLessThan3Chars(string invalidName)
     {
         Action action = () => new DomainEntity.Category(invalidName, "Category description");
-        var exception = Assert.Throws<EntityValidationException>(action);
-        Assert.Equal("Name should be at least 3 characters long", exception.Message);
+        action.Should().Throw<EntityValidationException>()
+            .WithMessage("Name should be at least 3 characters long");
     }
     
     [Fact(DisplayName = nameof(InstantiateWhenNameIsMoreThan255Chars))]
@@ -104,8 +123,8 @@ public class CategoryTest
     {
         var invalidName = String.Join(null, Enumerable.Range(0, 256).Select(_ => "a"));
         Action action = () => new DomainEntity.Category(invalidName, "Category description");
-        var exception = Assert.Throws<EntityValidationException>(action);
-        Assert.Equal("Name should not be longer than 255 characters", exception.Message);
+        action.Should().Throw<EntityValidationException>()
+            .WithMessage("Name should not be longer than 255 characters");
     }
     
     [Fact(DisplayName = nameof(InstantiateWhenDescriptionIsMoreThan10_000Chars))]
@@ -114,8 +133,8 @@ public class CategoryTest
     {
         var invalidDescription = String.Join(null, Enumerable.Range(0, 10_001).Select(_ => "a"));
         Action action = () => new DomainEntity.Category("Name", invalidDescription);
-        var exception = Assert.Throws<EntityValidationException>(action);
-        Assert.Equal("Description should not be longer than 10.000 characters", exception.Message);
+        action.Should().Throw<EntityValidationException>()
+            .WithMessage("Description should not be longer than 10.000 characters");
     }
     
     [Fact(DisplayName = nameof(ActivateCategory))]
@@ -136,7 +155,7 @@ public class CategoryTest
         category.ActivateCategory();
         
         //Assert
-        Assert.True(category.IsActive);
+        category.IsActive.Should().BeTrue();
     }
     
     [Fact(DisplayName = nameof(DeactivateCategory))]
@@ -157,7 +176,7 @@ public class CategoryTest
         category.DeactivateCategory();
         
         //Assert
-        Assert.False(category.IsActive);
+        category.IsActive.Should().BeFalse();
     }
     
     [Fact(DisplayName = nameof(UpdateCategory))]
@@ -173,8 +192,8 @@ public class CategoryTest
         category.UpdateCategory(newData.Name, newData.Description);
         
         //Assert
-        Assert.Equal(newData.Name, category.Name);
-        Assert.Equal(newData.Description, category.Description);
+        category.Name.Should().Be(newData.Name);
+        category.Description.Should().Be(newData.Description);
     }
     
     [Fact(DisplayName = nameof(UpdateCategoryOnlyName))]
@@ -191,8 +210,8 @@ public class CategoryTest
         category.UpdateCategory(newData.Name);
         
         //Assert
-        Assert.Equal(newData.Name, category.Name);
-        Assert.Equal(currentDescription, category.Description);
+        category.Name.Should().Be(newData.Name);
+        category.Description.Should().Be(currentDescription);
     }
     
     [Theory(DisplayName = nameof(UpdateCategoryWhenNameIsNullOrEmpty))]
@@ -204,8 +223,8 @@ public class CategoryTest
     {
         var category = new DomainEntity.Category("Category name", "Category description");
         Action action = () => category.UpdateCategory(name!, "Category description");
-        var exception = Assert.Throws<EntityValidationException>(action);
-        Assert.Equal("Name should not be null or empty", exception.Message);
+        action.Should().Throw<EntityValidationException>()
+            .WithMessage("Name should not be null or empty");
     }
     
     [Theory(DisplayName = nameof(UpdateCategoryWhenNameIsLessThan3Chars))]
@@ -218,8 +237,8 @@ public class CategoryTest
     {
         var category = new DomainEntity.Category("Category name", "Category description");
         Action action = () => category.UpdateCategory(invalidName, "Category description");
-        var exception = Assert.Throws<EntityValidationException>(action);
-        Assert.Equal("Name should be at least 3 characters long", exception.Message);
+        action.Should().Throw<EntityValidationException>()
+            .WithMessage("Name should be at least 3 characters long");
     }
     
     [Fact(DisplayName = nameof(UpdateCategoryWhenNameIsMoreThan255Chars))]
@@ -229,8 +248,8 @@ public class CategoryTest
         var category = new DomainEntity.Category("Category name", "Category description");
         var invalidName = String.Join(null, Enumerable.Range(0, 256).Select(_ => "a"));
         Action action = () => category.UpdateCategory(invalidName, "Category description");
-        var exception = Assert.Throws<EntityValidationException>(action);
-        Assert.Equal("Name should not be longer than 255 characters", exception.Message);
+        action.Should().Throw<EntityValidationException>()
+            .WithMessage("Name should not be longer than 255 characters");
     }
     
     [Fact(DisplayName = nameof(UpdateCategoryWhenDescriptionIsMoreThan10_000Chars))]
@@ -240,7 +259,7 @@ public class CategoryTest
         var category = new DomainEntity.Category("Category name", "Category description");
         var invalidDescription = String.Join(null, Enumerable.Range(0, 10_001).Select(_ => "a"));
         Action action = () => category.UpdateCategory(category.Name, invalidDescription);
-        var exception = Assert.Throws<EntityValidationException>(action);
-        Assert.Equal("Description should not be longer than 10.000 characters", exception.Message);
+        action.Should().Throw<EntityValidationException>()
+            .WithMessage("Description should not be longer than 10.000 characters");
     }
 }
