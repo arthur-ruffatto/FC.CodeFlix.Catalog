@@ -12,6 +12,23 @@ public class CategoryTest
     public CategoryTest(CategoryTestFixture categoryTestFixture) 
         => _categoryTestFixture = categoryTestFixture;
 
+    #region STATIC METHODS
+
+    public static IEnumerable<object[]> GetNamesWithLessThan3Chars(int numberOfNames)
+    {
+        var fixture = new CategoryTestFixture();
+        for (int i = 0; i < numberOfNames; i++)
+        {
+            var isOdd = i % 2 == 1;
+            yield return new object[]
+            {
+                fixture.GetValidCategoryName()[..(isOdd ? 1 : 2)]
+            };
+        }
+    }
+
+    #endregion
+
     [Fact(DisplayName = nameof(Instantiate))]
     [Trait("Domain", "Category - Aggregates")]
     public void Instantiate()
@@ -109,10 +126,7 @@ public class CategoryTest
     
     [Theory(DisplayName = nameof(InstantiateWhenNameIsLessThan3Chars))]
     [Trait("Domain", "Category - Aggregates")]
-    [InlineData("a")]
-    [InlineData("ab")]
-    [InlineData("1")]
-    [InlineData("12")]
+    [MemberData(nameof(GetNamesWithLessThan3Chars), parameters: 10)]
     public void InstantiateWhenNameIsLessThan3Chars(string invalidName)
     {
         var validCategory = _categoryTestFixture.GetValidCategory();
@@ -128,7 +142,7 @@ public class CategoryTest
     public void InstantiateWhenNameIsMoreThan255Chars()
     {
         var validCategory = _categoryTestFixture.GetValidCategory();
-        var invalidName = String.Join(null, Enumerable.Range(0, 256).Select(_ => "a"));
+        var invalidName = _categoryTestFixture.Faker.Lorem.Letter(256);
         
         Action action = () => new DomainEntity.Category(invalidName, validCategory.Description);
         
@@ -141,7 +155,7 @@ public class CategoryTest
     public void InstantiateWhenDescriptionIsMoreThan10_000Chars()
     {
         var validCategory = _categoryTestFixture.GetValidCategory();
-        var invalidDescription = String.Join(null, Enumerable.Range(0, 10_001).Select(_ => "a"));
+        var invalidDescription = _categoryTestFixture.Faker.Lorem.Letter(10_001);
         
         Action action = () => new DomainEntity.Category(validCategory.Name, invalidDescription);
         
@@ -188,7 +202,7 @@ public class CategoryTest
         /*TDD*/
         //Arrange
         var category = _categoryTestFixture.GetValidCategory();
-        var newData = new { Name = "New category name", Description = "New category description" };
+        var newData = _categoryTestFixture.GetValidCategory();
         
         //Act
         category.UpdateCategory(newData.Name, newData.Description);
@@ -205,14 +219,14 @@ public class CategoryTest
         /*TDD*/
         //Arrange
         var category = _categoryTestFixture.GetValidCategory();
-        var newData = new { Name = "New category name" };
+        var newName = _categoryTestFixture.GetValidCategoryName();
         var currentDescription = category.Description;
         
         //Act
-        category.UpdateCategory(newData.Name);
+        category.UpdateCategory(newName);
         
         //Assert
-        category.Name.Should().Be(newData.Name);
+        category.Name.Should().Be(newName);
         category.Description.Should().Be(currentDescription);
     }
     
@@ -233,10 +247,7 @@ public class CategoryTest
     
     [Theory(DisplayName = nameof(UpdateCategoryWhenNameIsLessThan3Chars))]
     [Trait("Domain", "Category - Aggregates")]
-    [InlineData("a")]
-    [InlineData("ab")]
-    [InlineData("1")]
-    [InlineData("12")]
+    [MemberData(nameof(GetNamesWithLessThan3Chars), parameters: 10)]
     public void UpdateCategoryWhenNameIsLessThan3Chars(string invalidName)
     {
         var category = _categoryTestFixture.GetValidCategory();
@@ -252,7 +263,7 @@ public class CategoryTest
     public void UpdateCategoryWhenNameIsMoreThan255Chars()
     {
         var category = _categoryTestFixture.GetValidCategory();
-        var invalidName = String.Join(null, Enumerable.Range(0, 256).Select(_ => "a"));
+        var invalidName = _categoryTestFixture.Faker.Lorem.Letter(256);
         
         Action action = () => category.UpdateCategory(invalidName);
         
@@ -265,7 +276,7 @@ public class CategoryTest
     public void UpdateCategoryWhenDescriptionIsMoreThan10_000Chars()
     {
         var category = _categoryTestFixture.GetValidCategory();
-        var invalidDescription = String.Join(null, Enumerable.Range(0, 10_001).Select(_ => "a"));
+        var invalidDescription = _categoryTestFixture.Faker.Lorem.Letter(10_001);
         
         Action action = () => category.UpdateCategory(category.Name, invalidDescription);
         
