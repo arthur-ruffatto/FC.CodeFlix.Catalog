@@ -1,8 +1,10 @@
 ﻿using FC.CodeFlix.Catalog.Application.Interfaces;
+using FC.CodeFlix.Catalog.Application.UseCases.Category;
 using FC.CodeFlix.Catalog.Domain.Entity;
 using FC.CodeFlix.Catalog.Domain.Repository;
+using FluentAssertions;
 using Moq;
-using UseCases = FC.CodeFlix.Catalog.Application.UseCases.CreateCategory;
+using UseCases = FC.CodeFlix.Catalog.Application.UseCases.Category.CreateCategory;
 
 namespace FC.CodeFlix.Catalog.UnitTests.Application.CreateCategory;
 
@@ -16,7 +18,7 @@ public class CreateCategoryTest
         var unitOfWorkMock = new Mock<IUnitOfWork>();
         var useCase = new UseCases.CreateCategory(repositoryMock.Object, unitOfWorkMock.Object);
 
-        var input = new CreateCategoryInput("Category Name", "Category Description", true);
+        var input = new UseCases.CreateCategoryInput("Category Name", "Category Description", true);
         var output = await useCase.Handle(input, CancellationToken.None);
         
         repositoryMock.Verify(repository => repository
@@ -29,6 +31,7 @@ public class CreateCategoryTest
         output.Name.Should().Be("Category Name");
         output.Description.Should().Be("Category Description");
         output.IsActive.Should().BeTrue();
-        output.Id.Should().NotBeNullOrEmpty();
+        output.Id.Should().NotBeEmpty();
+        output.CreatedAt.Should().NotBeSameDateAs(default);
     }
 }
