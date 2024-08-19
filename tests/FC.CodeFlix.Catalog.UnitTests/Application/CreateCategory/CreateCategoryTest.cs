@@ -1,4 +1,5 @@
-﻿using FC.CodeFlix.Catalog.Domain.Entity;
+﻿using FC.CodeFlix.Catalog.Application.Interfaces;
+using FC.CodeFlix.Catalog.Domain.Entity;
 using FC.CodeFlix.Catalog.Domain.Repository;
 using Moq;
 using UseCases = FC.CodeFlix.Catalog.Application.UseCases.CreateCategory;
