@@ -1,4 +1,5 @@
-﻿using Moq;
+﻿using FluentAssertions;
+using Moq;
 using UseCase = FC.CodeFlix.Catalog.Application.UseCases.Category.GetCategory;
 
 namespace FC.CodeFlix.Catalog.UnitTests.Application.GetCategory;
@@ -15,7 +16,7 @@ public class GetCategoryTest
 
     [Fact(DisplayName = nameof(GetCategory))]
     [Trait("Application", "GetCategory - Use Cases")]
-    public void GetCategory()
+    public async void GetCategory()
     {
         //Arrange
         var repositoryMock = _fixture.GetRepositoryMock();
@@ -28,7 +29,7 @@ public class GetCategoryTest
         ).ReturnsAsync(validCategory);
 
         var input = new UseCase.GetCategoryInput(validCategory.Id);
-        var useCase = new UseCase.GetCategory(repositoryMock);
+        var useCase = new UseCase.GetCategory(repositoryMock.Object);
         
         //Act
         var output = await useCase.Handle(input, CancellationToken.None);
