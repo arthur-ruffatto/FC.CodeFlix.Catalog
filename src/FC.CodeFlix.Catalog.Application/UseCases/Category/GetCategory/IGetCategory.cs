@@ -1,8 +1,8 @@
-﻿using MediatR;
+﻿using FC.CodeFlix.Catalog.Application.UseCases.Common;
+using MediatR;
 
 namespace FC.CodeFlix.Catalog.Application.UseCases.Category.GetCategory;
 
-public interface IGetCategory : IRequestHandler<GetCategoryInput, GetCategoryOutput>
+public interface IGetCategory : IRequestHandler<GetCategoryInput, CategoryModelOutput>
 {
-    public Task<GetCategoryOutput> Handle(GetCategoryInput input, CancellationToken cancellationToken);
 }
