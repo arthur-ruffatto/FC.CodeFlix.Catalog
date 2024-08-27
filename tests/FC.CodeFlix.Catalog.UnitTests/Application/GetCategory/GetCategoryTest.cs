@@ -56,7 +56,7 @@ public class GetCategoryTest
     {
         //Arrange
         var repositoryMock = _fixture.GetRepositoryMock();
-        var guid = new Guid();
+        var guid = Guid.NewGuid();
 
         repositoryMock.Setup(x => x.Get(
                 It.IsAny<Guid>(),
