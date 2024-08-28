@@ -1,4 +1,6 @@
-﻿using Moq;
+﻿using FC.CodeFlix.Catalog.Application.Exceptions;
+using FluentAssertions;
+using Moq;
 using UseCases = FC.CodeFlix.Catalog.Application.UseCases.Category.DeleteCategory;
 
 namespace FC.CodeFlix.Catalog.UnitTests.Application.DeleteCategory;
@@ -25,7 +27,7 @@ public class DeleteCategoryTest
             )
         ).ReturnsAsync(category);
         
-        var input = new DeleteCategoryInput(category.Id);
+        var input = new UseCases.DeleteCategoryInput(category.Id);
         var useCase = new UseCases.DeleteCategory(repositoryMock.Object, unitOfWorkMock.Object);
         
         //Act
@@ -48,7 +50,36 @@ public class DeleteCategoryTest
                 It.IsAny<CancellationToken>()
             ), Times.Once
         );
+    }
+    
+    [Fact(DisplayName = nameof(TestDeleteCategoryWhenCategoryNotFound))]
+    [Trait("Application", "DeleteCategory - Use Cases")]
+    public async Task TestDeleteCategoryWhenCategoryNotFound()
+    {
+        //Arrange
+        var repositoryMock = _fixture.GetRepositoryMock();
+        var unitOfWorkMock = _fixture.GetUnitOfWorkMock();
+        
+        var guid = Guid.NewGuid();
+        repositoryMock.Setup(x => x.Get(
+                guid, 
+                It.IsAny<CancellationToken>()
+            )
+        ).ThrowsAsync(new NotFoundException($"Category {guid} not found"));
+        
+        var input = new UseCases.DeleteCategoryInput(guid);
+        var useCase = new UseCases.DeleteCategory(repositoryMock.Object, unitOfWorkMock.Object);
+        
+        //Act
+        var task = async () => await useCase.Handle(input, CancellationToken.None);
 
-
+        //Assert
+        await task.Should().ThrowAsync<NotFoundException>();
+        
+        repositoryMock.Verify(x => x.Get(
+                guid,
+                It.IsAny<CancellationToken>()
+            ), Times.Once
+        );
     }
 }
