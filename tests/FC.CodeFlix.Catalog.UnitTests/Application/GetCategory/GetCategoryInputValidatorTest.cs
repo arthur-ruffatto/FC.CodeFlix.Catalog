@@ -8,6 +8,10 @@ public class GetCategoryInputValidatorTest
 {
     private readonly GetCategoryTestFixture _fixture;
 
+    public GetCategoryInputValidatorTest(GetCategoryTestFixture fixture) 
+        => _fixture = fixture;
+    
+
     [Fact(DisplayName = nameof(GetCategoryValidatorWhenInputIsValid))]
     [Trait("Application", "GetCategory - Use Cases")]
     public void GetCategoryValidatorWhenInputIsValid()
