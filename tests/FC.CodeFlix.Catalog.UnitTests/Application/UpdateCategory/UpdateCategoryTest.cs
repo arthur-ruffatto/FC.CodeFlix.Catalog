@@ -1,4 +1,5 @@
-﻿using FluentAssertions;
+﻿using FC.CodeFlix.Catalog.Domain.Entity;
+using FluentAssertions;
 using Moq;
 using UseCases = FC.CodeFlix.Catalog.Application.UseCases.Category.UpdateCategory;
 
@@ -12,25 +13,24 @@ public class UpdateCategoryTest
     public UpdateCategoryTest(UpdateCategoryTestFixture fixture) 
         => _fixture = fixture;
 
-    [Fact(DisplayName = nameof(TestUpdateCategory))]
+    [Theory(DisplayName = nameof(TestUpdateCategory))]
     [Trait("Application ", "UpdateCategory - Use Cases")]
-    public async Task TestUpdateCategory()
+    [MemberData(
+        nameof(UpdateCategoryTestDataGenerator.GetCategoriesToUpdate), 
+        parameters: 10,
+        MemberType = typeof(UpdateCategoryTestDataGenerator)
+        )
+    ]
+    public async Task TestUpdateCategory(Category category, UseCases.UpdateCategoryInput input)
     {
         //Arrange
         var repositoryMock = _fixture.GetRepositoryMock();
         var unitOfWorkMock = _fixture.GetUnitOfWorkMock();
-        var category = _fixture.GetValidCategory();
         repositoryMock.Setup(x => x.Get(
                 category.Id, 
                 It.IsAny<CancellationToken>()
             )
         ).ReturnsAsync(category);
-        var input = new UseCases.UpdateCategoryInput(
-            category.Id,
-            _fixture.GetValidCategoryName(), 
-            _fixture.GetValidCategoryDescription(), 
-            !category.IsActive
-            );
         var useCase = new UseCases.UpdateCategory(repositoryMock.Object, unitOfWorkMock.Object);
         
         //Act
