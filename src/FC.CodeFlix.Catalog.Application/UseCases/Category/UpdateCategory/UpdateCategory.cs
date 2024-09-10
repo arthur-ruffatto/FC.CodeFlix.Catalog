@@ -20,9 +20,9 @@ public class UpdateCategory : IUpdateCategory
         var category = await _categoryRepository.Get(request.Id, cancellationToken);
         
         category.UpdateCategory(request.Name, request.Description);
-        if (request.IsActive != category.IsActive)
+        if (request.IsActive != null &&request.IsActive != category.IsActive)
         {
-            if (request.IsActive)
+            if ((bool)request.IsActive)
                 category.ActivateCategory();
             else
                 category.DeactivateCategory();
